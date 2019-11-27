@@ -30,7 +30,7 @@ class NotificationManager ():
 
 notification_fields = {
     'id': fields.Integer,
-    'uri': fields.url('notification_endpoint'),
+    'uri': fields.Url('notification_endpoint'),
     'message': fields.String,
     'ttl': fields.Integer,
     'creation_date': fields.DateTime,
@@ -100,3 +100,11 @@ class NotificationList(Resource):
             )
         notification_manager.insert_notification(notification)
         return notification, HttpStatus.created_201.value
+
+app = Flask(__name__)
+service = Api(app)
+service.add_resource(NotificationList, '/service/notifications/')
+service.add_resource(Notification, '/service/notifications/<int:id>', endpoint='notification_endpoint')
+
+if __name__ == '__main__':
+    app.run(debug=True) #host='0.0.0.0'

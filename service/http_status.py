@@ -1,6 +1,6 @@
 from enum import Enum
 
-Class HttpStatus(Enum):
+class HttpStatus(Enum):
     Continue_100 = 100
     switching_protocols_101 = 101
     ok_200 = 200

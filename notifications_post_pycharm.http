@@ -1,0 +1,12 @@
+POST http://localhost:5000/service/notifications/
+Content-Type: application/json
+
+{
+  "message": "Working with Pycharm Professional",
+  "ttl": 12,
+  "notification_category": "information"
+}
+
+###
+
+
