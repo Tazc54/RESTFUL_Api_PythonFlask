@@ -56,3 +56,31 @@ class Notification(orm.Model, ResourceAddUpdateDelete):
 
         def __init__(self, name):
             self.name = name
+
+# CREATING SCHEMAS
+
+class NotificationCategorySchema(ma.Schema):
+    id = fields.Integer(dump_only=True)
+    # Minimum length = 3 characters
+    message = fiels.String(required=True, validate=validate.Length(5))
+    ttl = fields.Integer()
+    creation_date = fields.DateTime()
+    notification_category = fields.Nested(NotificationCategorySchema, only=['id', 'url', 'name'], required=True)
+    displayed_times = fields.Integer()
+    displayed_once = fields.Boolean()
+    url = ma.URLFor('service.notificationresource', id='<id>', _external=True)
+
+    @pre_load
+    def process_notification_category(self, data):
+        notification_category = data.get('notification_category')
+        if notification_category:
+            if isinstance(notification_category, dict):
+                notification_category_name = notification_category.get('name')
+            else:
+                notification_category_name = notification_category
+            notification_category_dict = dict(name=notification_category_name)
+        else:
+            notification_category_dict = {}
+        data['notification_category'] = notification_category_dict
+        return data
+        
