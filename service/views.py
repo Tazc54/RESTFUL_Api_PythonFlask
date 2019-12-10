@@ -11,6 +11,7 @@ notification_category_schema = NotificationCategorySchema()
 notification_schema = NotificationSchema()
 service = Api(service_blueprint)
 
+
 class NotificationResource(Resource):
     def get(self, id):
         notification = Notification.query.get_or_404(id)
@@ -53,6 +54,7 @@ class NotificationResource(Resource):
             response = {"error": str(e)}
             return response, HttpStatus.unauthorized_401.value
 
+
 class NotificationListResource(Resource):
     def get(self):
         notifications = Notification.query.all()
@@ -81,7 +83,7 @@ class NotificationListResource(Resource):
                 message=notification_category_dict['message'],
                 ttl=notification_category_dict['ttl'],
                 notification_category=notification_category)
-            notification.add(notification)
+            add(notification)
             query = Notification.query.get(notification.id)
             dump_result = notification_schema.dump(query).data
             return dump_result, HttpStatus.created_201.value
@@ -89,6 +91,7 @@ class NotificationListResource(Resource):
             orm.session.rollback()
             response = {"error": str(e)}
             return response, HttpStatus.bad_request_400.value
+
 
 class NotificationCategoryResource(Resource):
     def get(self, id):
@@ -126,6 +129,7 @@ class NotificationCategoryResource(Resource):
             response = {"error": str(e)}
             return response, HttpStatus.unauthorized_401.value
 
+
 class NotificationCategoryListResource(Resource):
     def get(self):
         notification_categories = NotificationCategory.query.all()
@@ -142,7 +146,7 @@ class NotificationCategoryListResource(Resource):
             return errors, HttpStatus.bad_request_400.value
         try:
             notification_category = NotificationCategory(notification_category_dict['name'])
-            notification_category.add(notification_category)
+            add(notification_category)
             query = NotificationCategory.query.get(notification_category.id)
             dump_result = notification_category_schema.dump(query).data
             return dump_result, HttpStatus.created_201.value
@@ -150,4 +154,9 @@ class NotificationCategoryListResource(Resource):
             orm.session.rollback()
             response = {"error": str(e)}
             return response, HttpStatus.bad_request_400.value
-        
+
+
+service.add_resource(NotificationCategoryListResource, '/notification_categories/')
+service.add_resource(NotificationCategoryResource, '/notification_categories/<int:id>')
+service.add_resource(NotificationListResource, '/notifications/')
+service.add_resource(NotificationResource, '/notifications/<int:id>')

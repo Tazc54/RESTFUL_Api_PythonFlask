@@ -8,8 +8,10 @@ from models import NotificationModel
 from http_status import HttpStatus
 from pytz import utc
 
-class NotificationManager ():
+
+class NotificationManager():
     last_id = 0
+
     def __init__(self):
         self.notifications = {}
 
@@ -23,6 +25,7 @@ class NotificationManager ():
 
     def delete_notification(self, id):
         del self.notifications[id]
+
 
 # Configuring Output fields, we will create a notification_fields dictionary
 # that we will use to control the data that we want Flask-RESTful to render
@@ -41,12 +44,13 @@ notification_fields = {
 
 notification_manager = NotificationManager()
 
+
 class Notification(Resource):
     def abort_if_notification_not_found(self, id):
         if id not in notification_manager.notifications:
             abort(
                 HttpStatus.not_found_404.value,
-                message = "Notification {0} doesn't exist".format(id))
+                message="Notification {0} doesn't exist".format(id))
 
     @marshal_with(notification_fields)
     def get(self, id):
@@ -63,10 +67,10 @@ class Notification(Resource):
         self.abort_if_notification_not_found(id)
         notification = notification_manager.get_notification(id)
         parser = reqparse.RequestParser()
-        parser.add_argument('message', type = str)
-        parser.add_argument('ttl', type = int)
-        parser.add_argument('displayed_times', type = int)
-        parser.add_argument('displayed_once', type = bool)
+        parser.add_argument('message', type=str)
+        parser.add_argument('ttl', type=int)
+        parser.add_argument('displayed_times', type=int)
+        parser.add_argument('displayed_once', type=bool)
         args = parser.parse_args()
         print(args)
         if 'message' in args and args['message'] is not None:
@@ -80,6 +84,7 @@ class Notification(Resource):
 
         return notification
 
+
 class NotificationList(Resource):
     @marshal_with(notification_fields)
     def get(self):
@@ -90,16 +95,18 @@ class NotificationList(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('message', type=str, required=True, help='Message cannot be blank!')
         parser.add_argument('ttl', type=int, required=True, help='Time to live cannot be blank!')
-        parser.add_argument('notification_category', type=str, required=True, help='Notification category cannot be blank!')
+        parser.add_argument('notification_category', type=str, required=True,
+                            help='Notification category cannot be blank!')
         args = parser.parse_args()
         notification = NotificationModel(
             message=args['message'],
             ttl=args['ttl'],
             creation_date=datetime.now(utc),
             notification_category=args['notification_category']
-            )
+        )
         notification_manager.insert_notification(notification)
         return notification, HttpStatus.created_201.value
+
 
 app = Flask(__name__)
 service = Api(app)
@@ -107,4 +114,4 @@ service.add_resource(NotificationList, '/service/notifications/')
 service.add_resource(Notification, '/service/notifications/<int:id>', endpoint='notification_endpoint')
 
 if __name__ == '__main__':
-    app.run(debug=True) #host='0.0.0.0'
+    app.run(debug=True)  # host='0.0.0.0'
